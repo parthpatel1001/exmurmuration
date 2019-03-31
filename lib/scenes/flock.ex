@@ -10,7 +10,7 @@ defmodule Exmurmuration.Scene.Flock do
     @tile_size 8
     @spacing 25 # space between birds
     @tile_radius 8
-    @frame_ms 192 # how often to update the frame/tick
+    @frame_ms 50 # how often to update the frame/tick
     # https://hexdocs.pm/scenic/Scenic.Primitive.Style.Paint.Color.html#content
     @bird_colors [:dark_orchid, :dodger_blue, :gold, :white]
     def init(_arg, opts) do
@@ -88,7 +88,7 @@ defmodule Exmurmuration.Scene.Flock do
             move_bird(
                 state, 
                 bird, 
-                {Enum.random(-1..1), Enum.random(-1..1)}
+                {Enum.random(-100..100)/1000, Enum.random(-100..100)/1000}
             )
         end)}
     end
