@@ -5,7 +5,7 @@ use Mix.Config
 # Configure the main viewport for the Scenic application
 config :exmurmuration, :viewport, %{
   name: :main_viewport,
-  size: {600, 600},
+  size: {1000, 1000},
   default_scene: {Exmurmuration.Scene.Flock, nil},
   drivers: [
     %{
