@@ -8,19 +8,32 @@ defmodule Exmurmuration.Scene.Flock do
     @graph Graph.build(font: :roboto, font_size: 36)
     
     @tile_radius 12
-    @frame_ms 30 # how often to update the frame/tick
+    @frame_ms 40 # how often to update the frame/tick
     # https://hexdocs.pm/scenic/Scenic.Primitive.Style.Paint.Color.html#content
-    @bird_colors [:gold, :dark_orange, :golden_rod, :orange, :orange_red, :yellow, :medium_spring_green]
+    # @bird_colors [:gold, :dark_orange, :golden_rod, :orange, :orange_red, :yellow, :medium_spring_green]
+    # @bird_colors [:gold, :golden_rod, :yellow]
+    @bird_colors [:golden_rod]
     
     @num_birds 12 # this number squared will the be the number of birds used
-    @z_min 3
-    @z_max 5
-    @wall_force 50
-    @z_scale 4
-    @neighbor_distance 2
+    @z_min 2
+    @z_max 3
+    
+    @z_scale 0.09
+    
+    @velocity_mult 1
+    @xy_jitter_dampen 1
+    @z_scale_jitter_dampen 5
+    
+    @neighbor_distance 5
     @speed_reduce 1 # reduce the direction vector to make animation smoother
-    @jitter -6..6
-    @wall_buffer 20
+    @jitter [-2.5,2.5]
+    @wall_force 80
+    @wall_buffer 10
+    @dampen_cohesion 1
+    @dampen_seperation 1
+
+    @start_pos_x 380..420
+    @start_pos_y 380..420
 
     def init(_arg, opts) do
         viewport = opts[:viewport]
@@ -70,9 +83,9 @@ defmodule Exmurmuration.Scene.Flock do
         %{
             id: id,
             position: {
-                Enum.random(50..75), 
-                Enum.random(50..60), 
-                Enum.random(@z_min..@z_max)
+                Enum.random(@start_pos_x), 
+                Enum.random(@start_pos_y), 
+                Enum.random(trunc(@z_min)..trunc(@z_max))
             },
             color: Enum.random(@bird_colors),
             direction: {
@@ -106,7 +119,7 @@ defmodule Exmurmuration.Scene.Flock do
 
     defp move_bird(state, bird) do
         bird
-            |> update_position()
+            # |> update_position()
             # |> jitter(state.flock)
             |> cohesion(state.flock)
             |> seperation(state.flock)
@@ -114,8 +127,8 @@ defmodule Exmurmuration.Scene.Flock do
             |> jitter(state.flock)
             |> speed_reduce(state.flock)
             # |> smooth(state.flock)
-            # |> update_direction_random(state.flock)
             |> wall_boundry(state.boundry)
+            |> update_position()
             # |> no_z_dir(state.flock)
     end
     defp print_bird(bird) do
@@ -124,22 +137,18 @@ defmodule Exmurmuration.Scene.Flock do
     end
 
     defp update_position(bird) do
-        %{bird | position: bird.position |> v_add(bird.direction) }
+        %{bird | position: bird.position |> v_add(bird.direction |> v_mult(@velocity_mult)) }
     end
 
     defp no_z_dir(bird=%{direction: {x,y,_z}}, flock) do
         %{bird | direction: {x,y,0}}
     end
 
-    defp update_direction_random(bird, flock) do
-        %{bird | direction: {Enum.random(-10..10)/10,Enum.random(-10..10)/10,0}}
-    end
-
     defp jitter(bird, flock) do
         %{bird | direction: v_add(bird.direction, {
-            Enum.random(@jitter),
-            Enum.random(@jitter),
-            Enum.random(@jitter)
+            Enum.random(@jitter) / @xy_jitter_dampen,
+            Enum.random(@jitter) / @xy_jitter_dampen,
+            Enum.random(@jitter) / @z_scale_jitter_dampen
         })}
     end
 
@@ -151,16 +160,14 @@ defmodule Exmurmuration.Scene.Flock do
             |> v_div(length(flock) - 1)
             |> v_sub(bird.position)
             |> v_div(2)
-        # v = {Enum.random(-10..10)/10,Enum.random(-10..10)/10,0}
-        %{bird | direction: v_add(bird.direction, v)}
+        %{bird | direction: v_add(bird.direction, v_div(v, @dampen_cohesion))}
     end
 
     defp seperation(bird, flock) do
         v = Enum.reduce(Enum.filter(flock, &seperation_filter(bird, &1)), {0,0,0}, fn f_bird, vector -> 
             v_sub(vector, v_sub(f_bird.position, bird.position))
         end)
-        # v = {Enum.random(-10..10)/10,Enum.random(-10..10)/10,0}
-        %{bird | direction: v_add(bird.direction, v)}
+        %{bird | direction: v_add(bird.direction, v_div(v, @dampen_seperation))}
     end
     defp alignment(bird, flock) do
         v = Enum.reduce(Enum.filter(flock, &skip_cur_filter(bird, &1)), {0,0,0}, fn f_bird, vector -> 
@@ -168,7 +175,6 @@ defmodule Exmurmuration.Scene.Flock do
         end) 
             |> v_div(length(flock) - 1)
             |> v_sub(bird.direction)
-        # v = {Enum.random(-10..10)/10,Enum.random(-10..10)/10,0}
         %{bird | direction: v_add(bird.direction, v)}
     end
     defp speed_reduce(bird, _flock), do: %{bird | direction: v_div(bird.direction, @speed_reduce)}
@@ -184,6 +190,8 @@ defmodule Exmurmuration.Scene.Flock do
 
     defp v_div(v1={x,y,z}, s) when is_number(s), do: {x/s, y/s, z/s}
     defp v_div(v1={x,y,z}, s={x1,y1,z1}), do: {x/x1, y/y1, z/z1}
+
+    defp v_mult(v1={x,y,z}, s) when is_number(s), do: {x*s, y*s, z*s}
 
     defp wall_boundry(
         bird=%{position: {x,y,z}, direction: {dx,dy,dz}},
