@@ -1,5 +1,9 @@
-# Setup
-## Install Elixir
+![Image of bird murmurations running](docs/screencap.gif)
+
+# Running
+`mix scenic.run`
+
+### Install Elixir
 ```
 parthpatel@Parths-MacBook-Pro exmurmuration $ elixir --version
 Erlang/OTP 21 [erts-10.3.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe] [dtrace]
@@ -12,6 +16,4 @@ parthpatel@Parths-MacBook-Pro exmurmuration $
 * `mix archive.install hex scenic_new` # TODO - might not need these bec of deps.get
 * `mix deps.get`
 
-# Running
 
-`mix scenic.run`
