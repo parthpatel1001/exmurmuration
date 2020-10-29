@@ -1,3 +1,17 @@
+# mac
+.DS_Store
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 

@@ -7,12 +7,12 @@ defmodule Exmurmuration.Scene.Flock do
     # Constants
     @graph Graph.build(font: :roboto, font_size: 36)
     
-    @tile_radius 12
-    @frame_ms 40 # how often to update the frame/tick
+    @tile_radius 2
+    @frame_ms 60 # how often to update the frame/tick
     # https://hexdocs.pm/scenic/Scenic.Primitive.Style.Paint.Color.html#content
-    # @bird_colors [:gold, :dark_orange, :golden_rod, :orange, :orange_red, :yellow, :medium_spring_green]
+    @bird_colors [:gold, :dark_orange, :golden_rod, :orange, :orange_red, :yellow, :medium_spring_green]
     # @bird_colors [:gold, :golden_rod, :yellow]
-    @bird_colors [:golden_rod]
+    # @bird_colors [:golden_rod]
     
     @num_birds 12 # this number squared will the be the number of birds used
     @z_min 2
@@ -29,11 +29,11 @@ defmodule Exmurmuration.Scene.Flock do
     @jitter [-2.5,2.5]
     @wall_force 80
     @wall_buffer 10
-    @dampen_cohesion 1
+    @dampen_cohesion 0.5
     @dampen_seperation 1
 
-    @start_pos_x 380..420
-    @start_pos_y 380..420
+    @start_pos_x 400..420
+    @start_pos_y 400..420
 
     def init(_arg, opts) do
         viewport = opts[:viewport]
@@ -152,7 +152,9 @@ defmodule Exmurmuration.Scene.Flock do
         })}
     end
 
-
+    defp all(bird, flock) do
+        
+    end
     defp cohesion(bird, flock) do
         v = Enum.reduce(Enum.filter(flock, &skip_cur_filter(bird, &1)), {0,0,0}, fn f_bird, vector -> 
             v_add(vector, f_bird.position)

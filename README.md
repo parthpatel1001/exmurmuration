@@ -11,3 +11,7 @@ parthpatel@Parths-MacBook-Pro exmurmuration $
 * Install dependencies from [here](https://github.com/boydm/scenic_new#installing-on-macos)
 * `mix archive.install hex scenic_new` # TODO - might not need these bec of deps.get
 * `mix deps.get`
+
+# Running
+
+`mix scenic.run`
